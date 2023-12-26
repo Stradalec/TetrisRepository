@@ -7,17 +7,12 @@
 
 using namespace std;
 
-struct shape {
-  int shapeWidth;
-  int shapeHeight;
-};
 
 bool game = true;
 int mapWidth = 21;
 int mapHeight = 21;
 int spawnXCoord = 0;
 int spawnYCoord = 10;
-shape spawnShape;
 int timer = 60;
 int barrierXPos[400];
 int barrierYPos[400];
@@ -200,6 +195,7 @@ int main() {
 	int time = 0;
 	char playerName[20];
 	int gameDifficulty = 0;
+	bool spawnBonus = true;
 
 	cout << "Enter your name: ";
 	cin >> playerName;
@@ -222,8 +218,10 @@ int main() {
   while (game && timer > 0) {
 		controls();
 		logic();
-		if (timer % 5 == 0 && timer != 60) {
+		spawnBonus = true;
+		if (timer % 5 == 0 && timer != 60 && spawnBonus) {
 			chooseBonus();
+			spawnBonus = false;
 		}
 	  map();
 	  Sleep(sleepTime);
