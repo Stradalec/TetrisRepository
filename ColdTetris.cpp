@@ -29,28 +29,36 @@ char tetrisFloor = (char) 205;
 int score = 0;
 int brickCheck = 0;
 int lowBorder = 20;
-int spawnClearXCoord = 0;
-int spawnClearYCoord = 0;
+int thirdBarrierXCoord = 0;
+int thirdBarrierYCoord = 0;
 int spawnTimeXCoord = 0;
 int spawnTimeYCoord = 0;
+int firstBarrierXCoord = 0;
+int firstBarrierYCoord = 0;
+int secondBarrierXCoord = 0;
+int secondBarrierYCoord = 0;
+int increaseTime = 10;
+
+void constBarrier() {
+	srand(time(0) );
+
+	firstBarrierXCoord = 10 + rand() % (mapWidth / 2);
+	firstBarrierYCoord = 10 + rand() % (mapHeight / 2);
+	secondBarrierXCoord = 10 + rand() % (mapWidth / 2);
+	secondBarrierYCoord = 10 + rand() % (mapHeight / 2);
+	thirdBarrierXCoord = 10 + rand() % (mapWidth / 2);
+	thirdBarrierYCoord = 10 + rand() % (mapWidth / 2);
+}
 
 void chooseBonus() {
 	srand(time(0));
-	int choose = 0;
-	choose = rand() % 2;
-	switch (choose) {
-	  case 0:
-	    spawnClearXCoord = (rand() % mapWidth) - 1;
-			spawnClearYCoord = (rand() % mapHeight) - 1;
-		case 1:
-			spawnTimeXCoord = (rand() % mapWidth) - 1;
-			spawnTimeYCoord = (rand() % mapHeight) - 1;
-	}
+	spawnTimeXCoord = 10 + (rand() % mapWidth / 2);
+	spawnTimeYCoord = 10 + (rand() % mapHeight /2);
 }
 
 void map() {
   system("cls");
-  srand(time(0));
+  srand(time(0)  );
   for (int mapIndex = 0; mapIndex < mapHeight; ++mapIndex) {
 	  for (int cellIndex = 0; cellIndex < mapWidth; ++cellIndex) {
       if (cellIndex == 0 || cellIndex == mapWidth - 1) {
@@ -59,8 +67,12 @@ void map() {
 		    cout << wall;
 	    } else if (cellIndex == spawnYCoord && mapIndex == spawnXCoord) {
 				cout << brick;
-			} else if (cellIndex == spawnClearYCoord && mapIndex == spawnClearXCoord) {
-				cout << "C";
+			} else if (cellIndex == thirdBarrierXCoord && mapIndex == thirdBarrierYCoord) {
+				cout << brick;
+			} else if (cellIndex == firstBarrierXCoord && mapIndex == firstBarrierYCoord) {
+				cout << brick;
+			} else if (cellIndex == secondBarrierXCoord && mapIndex == secondBarrierYCoord) {
+				cout << brick;
 			} else if (cellIndex == spawnTimeYCoord && mapIndex == spawnTimeXCoord) {
 				cout << "T";
 			} else {
@@ -108,6 +120,9 @@ void controls() {
 		  case 'a':
 				--spawnYCoord;
 			  break;
+			case 'k':
+				game = false;
+				break;
 		}
 	}
 
@@ -126,10 +141,13 @@ int brickCollision() {
 	int findBrick = 0;
 	while (findBrick == 0) {
 		for (int checkFloorIndex = 0; checkFloorIndex <= sizeof(cellFillX); ++checkFloorIndex) {
-			if (spawnXCoord + 1 == cellFillX[checkFloorIndex] && spawnYCoord == cellFillY[checkFloorIndex] ) {
+			if ((spawnXCoord + 1 == cellFillX[checkFloorIndex] && spawnYCoord == cellFillY[checkFloorIndex] ) ||
+				(spawnXCoord + 1 == thirdBarrierYCoord && spawnYCoord == thirdBarrierXCoord) ||
+				(spawnXCoord + 1 == firstBarrierYCoord && spawnYCoord == firstBarrierXCoord) || 
+				(spawnXCoord + 1 == secondBarrierYCoord && spawnYCoord == secondBarrierXCoord) ) {
 				findBrick = 1;
 				break;
-			} else if (checkFloorIndex == sizeof(cellFillX)) {
+			} else if (checkFloorIndex == sizeof(cellFillX) ) {
 				findBrick = 2;
 			}
 		}
@@ -141,15 +159,9 @@ void logic() {
 	if (spawnYCoord == 0 || spawnYCoord >= mapHeight - 1) {
 		spawnYCoord = mapHeight / 2;
 	}
-	if (spawnXCoord == spawnClearXCoord && spawnYCoord == spawnClearYCoord) {
-		clear();
-		++score;
-		spawnClearXCoord = 0;
-		spawnClearYCoord = 0;
-	}
 	if (spawnXCoord == spawnTimeXCoord && spawnYCoord == spawnTimeYCoord) {
 		++score;
-		timer += 10;
+		timer += increaseTime;
 		spawnTimeXCoord = 0;
 		spawnTimeYCoord = 0;
 	}
@@ -196,6 +208,7 @@ int main() {
 	char playerName[20];
 	int gameDifficulty = 0;
 	bool spawnBonus = true;
+	int previousScore = 0;
 
 	cout << "Enter your name: ";
 	cin >> playerName;
@@ -208,6 +221,8 @@ int main() {
 	if (gameDifficulty <= 0) {
 		gameDifficulty = 1;
 	}
+
+	constBarrier();
 
 	cout << "Press any button to start.";
 
@@ -225,11 +240,16 @@ int main() {
 		}
 	  map();
 	  Sleep(sleepTime);
+		if (timer == 0 || game == false) {
+			cout << "You lost" << endl;
+		}
 		if (score == gameDifficulty) {
 			game = false;
 			cout << playerName << ", you won! Congratulations!";
-		}
-
+		} else if (score > previousScore) {
+			constBarrier();
+			++previousScore;
+		}		
   }
 
 }
